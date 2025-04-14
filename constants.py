@@ -2,12 +2,12 @@ from torchvision import transforms
 
 transform = transforms.Compose([
     transforms.Resize((256,256)),                # Resize to 256x256
-  #  transforms.CenterCrop(224),           # Crop to 224x224
+   # transforms.CenterCrop(224),           # Crop to 224x224
     transforms.ToTensor(),                # Convert to tensor
-    #transforms.Normalize(                  # Normalize
-     #   mean=[0.485, 0.456, 0.406],       # Standard ImageNet normalization
-      #  std=[0.229, 0.224, 0.225]
-   # )
+    transforms.Normalize(                  # Normalize
+        mean=[0.485, 0.456, 0.406],       # Standard ImageNet normalization
+        std=[0.229, 0.224, 0.225]
+    )
 ])
 
 dataset_root = "/media/filestorage/datasets/food-101/images"

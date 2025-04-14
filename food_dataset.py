@@ -3,7 +3,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 
 class FoodDataset(Dataset):
-    def __init__(self, root_dir, classes, labels, transform=None):
+    def __init__(self, root_dir, classes, skip, take, labels, transform=None):
         self.root_dir = root_dir
         self.transform = transform
         self.labels = labels
@@ -12,11 +12,19 @@ class FoodDataset(Dataset):
         self.img_paths = []
         for cls_name in classes:
             cls_dir = os.path.join(root_dir, cls_name)
+            s, t = 0, 0
             if os.path.isdir(cls_dir):
-                for img_name in os.listdir(cls_dir):
+                dirnames = sorted(os.listdir(cls_dir))                  
+                for img_name in dirnames:
                     img_path = os.path.join(cls_dir, img_name)
                     if os.path.isfile(img_path):
-                        self.img_paths.append((img_path, self.class_to_idx[cls_name]))
+                        if s > skip:
+                            self.img_paths.append((img_path, self.class_to_idx[cls_name]))
+                            t += 1
+                        else:
+                            s += 1
+                        if t >= take:
+                            break
         
     def __len__(self):
         return len(self.img_paths)
@@ -36,3 +44,6 @@ class FoodDataset(Dataset):
     
     def get_class_name(self, idx):
         return self.classes[idx]
+    
+    def name(self):
+        return self.__class__.__name__
