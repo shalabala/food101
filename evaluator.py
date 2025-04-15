@@ -5,5 +5,5 @@ class Evaluator:
         with torch.no_grad():
             self.eval(model, dataloader, device)
     
-    def name():
+    def name(self):
         return self.__class__.__name__

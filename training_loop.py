@@ -4,7 +4,7 @@ from evaluator import Evaluator
 import torch
 
 class TrainingLoop:
-    def __init__(self, settings : TrainSettings, evals : list[Evaluator]):
+    def __init__(self, settings : TrainSettings, evals : list[Evaluator] = []):
         self.current_epoch = 0
         self.ellapsed_time = 0
         self.tr_losses = []

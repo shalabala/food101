@@ -42,3 +42,6 @@ class FoodModel(nn.Module):
             x = self.forward(x)
             _, predicted = torch.max(x, 1)
         return predicted
+    
+    def name(self):
+        return self.__class__.__name__
