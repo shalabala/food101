@@ -17,7 +17,8 @@ class TrainSettings:
                  optimizer_type='adam',
                  lr=0e-3,
                  momentum=0.9,
-                 save_after_epoch=None,):
+                 save_after_epoch=None,
+                 print_steps = False):
 
         if save_after_epoch is None:
             save_after_epoch = eval_after_epoch
@@ -57,6 +58,8 @@ class TrainSettings:
                 model.parameters(), lr=lr, momentum=momentum)
         else:
             raise ValueError(f"Unknown optimizer type: {optimizer_type}")
+        
+        self.print_steps = print_steps
 
     def properties(self):
         return {

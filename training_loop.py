@@ -19,11 +19,13 @@ class TrainingLoop:
         if epochs > self.settings.epochs:
             return
         start_time = time.time()
-        
+        print(f"Training {self.settings.name} for {epochs} epochs")
+        print(f"Training on {self.settings.device}")
         for epoch in range(self.current_epoch, epochs):
             epoch_tr_loss = 0.0
             epoch_val_loss = 0.0
             self.current_epoch = epoch
+            step = 0
             for imgs, labels in self.settings.train_data:
                 imgs, labels = imgs.to(self.settings.device), labels.to(self.settings.device)
                 outputs = self.settings.model(imgs)
@@ -33,6 +35,9 @@ class TrainingLoop:
                 self.settings.optimizer.zero_grad()
                 loss.backward()
                 self.settings.optimizer.step()
+                if(self.settings.print_steps):
+                    print(f"Step {step}, Train Loss: {loss.item():.4f}")
+                step += 1
             
             evaluations = []
             with torch.no_grad():
