@@ -54,7 +54,7 @@ class TrainingLoop:
             self.settings.save_if_needed(epoch)
 
             if(epoch + 1) % self.settings.eval_after_epoch == 0:
-                print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {epoch_tr_loss:.4f}, Validation Loss: {epoch_val_loss:.4f} Evaluations: {evaluations}") 
+                print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {epoch_tr_loss:.4f}, Validation Loss: {epoch_val_loss:.4f} Evaluations: {evaluations} ETA: {self.ellapsed_time / (epoch + 1) * (epochs - epoch - 1):.2f} seconds") 
          
         self.settings.save_final()       
         end_time = time.time() - start_time
