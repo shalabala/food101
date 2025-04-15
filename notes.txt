@@ -1,0 +1,14 @@
+Colab training speeds:
+
+A100 training speed:
+    - batch size 32, step: 24s epoch/class 500secs
+    - batch size 64, step: 43s epoch/class 537secs 
+
+
+L4 training speed:
+    - batch size 32, step: 10s epoch/class 250 secs
+    - batch size 64, step: 33s epoch/class secs 421 secs
+
+T4 training speed:
+    - batch size 32, step: 7s epoch/class 175 secs
+    - batch size 64, step: 12s epoch/class 150 secs
