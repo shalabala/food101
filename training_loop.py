@@ -24,21 +24,25 @@ class TrainingLoop:
         print(f"Training on {self.settings.device}")
         start_epoch = self.current_epoch
         for epoch in range(self.current_epoch, epochs):
-            imgs, labels = imgs.to(self.settings.device), labels.to(
-                self.settings.device)
-            outputs = self.settings.model(imgs)
-            if self.settings.print_memory:
-                print(
-                    f"Memory usage: {torch.cuda.memory_allocated(self.settings.device) / 1024**2:.2f} MB")
-            loss = self.settings.loss_fn(outputs, labels)
-            epoch_tr_loss += loss.item()
-
-            self.settings.optimizer.zero_grad()
-            loss.backward()
-            self.settings.optimizer.step()
-            if (self.settings.print_steps):
-                eta = time.time() - start_time
-                print(f"Step {step}, Ellapsed {eta:.2f} seconds, Train Loss: {loss.item():.4f}, ETA: {TrainingLoop.calculate_step_eta(epoch-start_epoch, epochs - start_epoch, step, len(self.settings.train_data), len(self.settings.val_data), eta):.2f} seconds")
+            self.settings.model.train()
+            epoch_tr_loss = 0.0
+            epoch_val_loss = 0.0
+            self.current_epoch = epoch
+            step = 0
+            for imgs, labels in self.settings.train_data:
+                imgs, labels = imgs.to(self.settings.device), labels.to(self.settings.device)
+                outputs = self.settings.model(imgs)
+                if self.settings.print_memory:
+                    print(f"Memory usage: {torch.cuda.memory_allocated(self.settings.device) / 1024**2:.2f} MB")
+                loss = self.settings.loss_fn(outputs, labels)
+                epoch_tr_loss += loss.item()
+                
+                self.settings.optimizer.zero_grad()
+                loss.backward()
+                self.settings.optimizer.step()
+                if(self.settings.print_steps):
+                    eta = time.time() - start_time
+                    print(f"Step {step}, Ellapsed {eta:.2f} seconds, Train Loss: {loss.item():.4f}, ETA: {TrainingLoop.calculate_step_eta(epoch-start_epoch, epochs - start_epoch, step, len(self.settings.train_data), len(self.settings.val_data), eta):.2f} seconds")
             step += 1
 
             evaluations = []
