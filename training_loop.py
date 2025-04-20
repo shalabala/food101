@@ -21,6 +21,7 @@ class TrainingLoop:
         start_time = time.time()
         print(f"Training {self.settings.name} for {epochs} epochs")
         print(f"Training on {self.settings.device}")
+        start_epoch = self.current_epoch
         for epoch in range(self.current_epoch, epochs):
             self.settings.model.train()
             epoch_tr_loss = 0.0
@@ -30,6 +31,8 @@ class TrainingLoop:
             for imgs, labels in self.settings.train_data:
                 imgs, labels = imgs.to(self.settings.device), labels.to(self.settings.device)
                 outputs = self.settings.model(imgs)
+                if self.settings.print_memory:
+                    print(f"Memory usage: {torch.cuda.memory_allocated(self.settings.device) / 1024**2:.2f} MB")
                 loss = self.settings.loss_fn(outputs, labels)
                 epoch_tr_loss += loss.item()
                 
@@ -37,7 +40,8 @@ class TrainingLoop:
                 loss.backward()
                 self.settings.optimizer.step()
                 if(self.settings.print_steps):
-                    print(f"Step {step}, Train Loss: {loss.item():.4f}")
+                    eta = time.time() - start_time
+                    print(f"Step {step}, Ellapsed {eta:.2f} seconds, Train Loss: {loss.item():.4f}, ETA: {TrainingLoop.calculate_step_eta(epoch-start_epoch, epochs - start_epoch, step, len(self.settings.train_data), self.settings.train_data.batch_size, len(self.settings.val_data), self.settings.val_data.batch_size, eta  ):.2f} seconds")
                 step += 1
             
             evaluations = []
@@ -61,8 +65,20 @@ class TrainingLoop:
             self.settings.save_if_needed(epoch)
 
             if(epoch + 1) % self.settings.eval_after_epoch == 0:
-                print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {epoch_tr_loss:.4f}, Validation Loss: {epoch_val_loss:.4f} Evaluations: {evaluations} ETA: {self.ellapsed_time / (epoch + 1) * (epochs - epoch - 1):.2f} seconds") 
+                print(f"Epoch {epoch + 1}/{epochs}, Ellapsed {(time.time() - start_time):.2f} seconds, Train Loss: {epoch_tr_loss:.4f}, Validation Loss: {epoch_val_loss:.4f} Evaluations: {evaluations} ETA: {self.ellapsed_time / (epoch + 1) * (epochs - epoch - 1):.2f} seconds") 
          
         self.settings.save_final()       
         end_time = time.time() - start_time
-        self.ellapsed_time += end_time    
+        self.ellapsed_time += end_time
+    
+    @staticmethod
+    def calculate_step_eta( current_epoch, epochs, current_step, tr_len, tr_batch_size, val_len, val_batch_size, ellapsed_time):
+        step_per_epoch = (tr_len // tr_batch_size) + (val_len // val_batch_size)
+        epochs_left = epochs - current_epoch 
+        steps_left = step_per_epoch * epochs_left - current_step
+        steps_already_taken = current_epoch * step_per_epoch + current_step
+        step_time = ellapsed_time / (steps_already_taken+1)
+        eta = step_time * steps_left
+        return eta
+        
+        

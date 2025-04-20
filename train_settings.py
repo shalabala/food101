@@ -18,7 +18,9 @@ class TrainSettings:
                  lr=0e-3,
                  momentum=0.9,
                  save_after_epoch=None,
-                 print_steps = False):
+                 print_steps = False,
+                 print_memory = False,
+                 ):
 
         if save_after_epoch is None:
             save_after_epoch = eval_after_epoch
@@ -50,7 +52,7 @@ class TrainSettings:
         self.save_path = save_path
         self.save_after_epoch = save_after_epoch
         self.name = name
-
+        self.print_memory = print_memory
         if optimizer_type == 'adam':
             self.optimizer = torch.optim.Adam(model.parameters(), lr=lr)
         elif optimizer_type == 'sgd':
