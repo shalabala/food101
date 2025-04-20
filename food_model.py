@@ -30,7 +30,7 @@ class FoodModel(nn.Module):
         x = F.relu(self.bn4(self.conv4(x)))
         x = F.max_pool2d(x, 2)
         x = x.view(x.size(0), -1)
-        # x = F.relu(self.bn5(self.fc1(x)))
+        x = F.relu(self.fc1(x))
         # x = F.relu(self.fc2(x))
         x = self.fc3(x)
 
