@@ -14,12 +14,12 @@ class FoodModel(nn.Module):
         self.conv4 = nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1)
         self.bn4 = nn.BatchNorm2d(512)
         # The input size is 256x256, so after 4 max pooling layers,
-        # the output size will be 16x16 
-        self.fc1 = nn.Linear(16*16*512, 2048)
-        self.bn5 = nn.BatchNorm1d(2048)
-        self.fc2 = nn.Linear(2048, 512)
+        # the output size will be 16x16
+        self.fc1 = nn.Linear(16*16*512, 512)
+        # self.bn5 = nn.BatchNorm1d(2048)
+        # self.fc2 = nn.Linear(2048, 512)
         self.fc3 = nn.Linear(512, num_classes)
-    
+
     def forward(self, x):
         x = F.relu(self.bn1(self.conv1(x)))
         x = F.max_pool2d(x, 2)
@@ -30,18 +30,18 @@ class FoodModel(nn.Module):
         x = F.relu(self.bn4(self.conv4(x)))
         x = F.max_pool2d(x, 2)
         x = x.view(x.size(0), -1)
-        x = F.relu(self.bn5(self.fc1(x)))
-        x = F.relu(self.fc2(x))
+        # x = F.relu(self.bn5(self.fc1(x)))
+        # x = F.relu(self.fc2(x))
         x = self.fc3(x)
-        
+
         return x
-    
+
     def predict(self, x):
         with torch.no_grad():
             self.eval()
             x = self.forward(x)
             _, predicted = torch.max(x, 1)
         return predicted
-    
+
     def name(self):
         return self.__class__.__name__

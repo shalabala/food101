@@ -22,6 +22,7 @@ class TrainingLoop:
         print(f"Training {self.settings.name} for {epochs} epochs")
         print(f"Training on {self.settings.device}")
         for epoch in range(self.current_epoch, epochs):
+            self.settings.model.train()
             epoch_tr_loss = 0.0
             epoch_val_loss = 0.0
             self.current_epoch = epoch
@@ -40,6 +41,7 @@ class TrainingLoop:
                 step += 1
             
             evaluations = []
+            self.settings.model.eval()
             with torch.no_grad():
                 for imgs, labels in self.settings.val_data:
                     imgs, labels = imgs.to(self.settings.device), labels.to(self.settings.device)
