@@ -43,7 +43,6 @@ class TrainingLoop:
                     if self.settings.print_memory:
                         print(f"Memory usage: {torch.cuda.memory_allocated(self.settings.device) / 1024**2:.2f} MB")
                     eta = time.time() - start_time
-                    trloss = loss.item() / (step+1)
                     ellapsed_time_string = utility.time_string(eta)
                     eta_time_string = utility.time_string(TrainingLoop.calculate_step_eta(
                         epoch-start_epoch,
@@ -52,7 +51,7 @@ class TrainingLoop:
                         len(self.settings.train_data),
                         len(self.settings.val_data), eta))
                     print(
-                        f"[{utility.current_time_for_log()}] Epoch {epoch+1} Step {step+1}/{len(self.settings.train_data)}, Ellapsed {ellapsed_time_string}, Train Loss: {trloss:.4f}, ETA: {eta_time_string}")
+                        f"[{utility.current_time_for_log()}] Epoch {epoch+1} Step {step+1}/{len(self.settings.train_data)}, Ellapsed {ellapsed_time_string}, Train Loss: {loss.item():.4f}, ETA: {eta_time_string}")
                 step += 1
 
             evaluations = []
