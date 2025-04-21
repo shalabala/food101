@@ -18,7 +18,7 @@ class TrainSettings:
                  lr=0e-3,
                  momentum=0.9,
                  save_after_epoch=None,
-                 print_steps = False,
+                 print_after_steps = -1,
                  print_memory = False,
                  ):
 
@@ -61,7 +61,7 @@ class TrainSettings:
         else:
             raise ValueError(f"Unknown optimizer type: {optimizer_type}")
         
-        self.print_steps = print_steps
+        self.print_after_steps = print_after_steps
 
     def properties(self):
         return {
@@ -77,7 +77,7 @@ class TrainSettings:
         }
 
     def save_if_needed(self, epoch):
-        if epoch % self.save_after_epoch == 0:
+        if (epoch+1) % self.save_after_epoch == 0:
             torch.save(self.model.state_dict(), os.path.join(
                 self.save_path, f'{self.name}_epoch_{epoch}.pth'))
 

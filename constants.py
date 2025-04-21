@@ -13,6 +13,7 @@ transform = transforms.Compose([
 dataset_root = "/media/filestorage/datasets/food-101/images"
 dataset_root_drive = "/content/drive/MyDrive/datasets/food-101/images"
 save_path_drive = "/content/drive/MyDrive/dt_models/food101/"
+save_path = "/media/filestorage/code/projects/food101"
 
 min_class_labels = [
     "Fried rice",

@@ -1,3 +1,9 @@
+from datetime import datetime
+
+def current_time_for_log() -> str:
+    current_time = datetime.now().strftime("%H:%M:%S")
+    return current_time
+
 def time_string(secs: float) -> str:
     """Convert seconds to a string in the format of HH:MM:SS."""
     hours, remainder = divmod(int(secs), 3600)

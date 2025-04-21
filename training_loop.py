@@ -41,10 +41,10 @@ class TrainingLoop:
                 self.settings.optimizer.zero_grad()
                 loss.backward()
                 self.settings.optimizer.step()
-                time.sleep(5)  # Simulate training step
-                if (self.settings.print_steps):
+                if self.settings.print_after_steps > 0 and (step + 1) % self.settings.print_after_steps == 0:
                     eta = time.time() - start_time
                     trloss = loss.item()
+                    ellapsed_time_string = utility.time_string(eta)
                     eta_time_string = utility.time_string(TrainingLoop.calculate_step_eta(
                         epoch-start_epoch,
                         epochs - start_epoch,
@@ -52,7 +52,7 @@ class TrainingLoop:
                         len(self.settings.train_data),
                         len(self.settings.val_data), eta))
                     print(
-                        f"Step {step}, Ellapsed {eta:.2f} seconds, Train Loss: {trloss}, ETA: {eta_time_string}")
+                        f"[{utility.current_time_for_log()}] Epoch {epoch+1} Step {step+1}, Ellapsed {ellapsed_time_string}, Train Loss: {trloss:.4f}, ETA: {eta_time_string}")
                 step += 1
 
             evaluations = []
@@ -64,7 +64,7 @@ class TrainingLoop:
                     outputs = self.settings.model(imgs)
                     loss = self.settings.loss_fn(outputs, labels)
                     epoch_val_loss += loss.item()
-                if self.current_epoch % self.settings.eval_after_epoch == 0:
+                if (self.current_epoch + 1) % self.settings.eval_after_epoch == 0:
                     for eval in self.evaluators:
                         evaluation = eval(
                             self.settings.model, self.settings.val_data, self.settings.device)
@@ -75,11 +75,16 @@ class TrainingLoop:
             self.tr_losses.append(epoch_tr_loss)
             self.val_losses.append(epoch_val_loss)
             self.evaluations.append(evaluations)
-            self.settings.save_if_needed(epoch)
+            # if this is fial epoch it would be saved anyways by save_final
+            if epoch + 1 != epochs:
+                self.settings.save_if_needed(epoch)
 
             if (epoch + 1) % self.settings.eval_after_epoch == 0:
-                eta_time_string = utility.time_string(self.ellapsed_time / (epoch + 1) * (epochs - epoch - 1))
-                print(f"Epoch {epoch + 1}/{epochs}, Ellapsed {(time.time() - start_time):.2f} seconds, " + 
+                ellapsed_time = time.time() - start_time
+                eta_time_string = utility.time_string(
+                    ellapsed_time / (epoch + 1) * (epochs - epoch - 1))
+                ellapsed_time_string = utility.time_string(ellapsed_time)
+                print(f"[{utility.current_time_for_log()}] Epoch {epoch + 1}/{epochs}, Ellapsed {ellapsed_time_string} seconds, " +
                       f"Train Loss: {epoch_tr_loss:.4f}, Validation Loss: {epoch_val_loss:.4f} Evaluations: " +
                       f"{evaluations} ETA: {eta_time_string}")
 
@@ -95,6 +100,4 @@ class TrainingLoop:
         steps_already_taken = current_epoch * step_per_epoch + current_step + 1
         step_time = ellapsed_time / steps_already_taken
         eta = step_time * steps_left
-        print(f"Step time: {step_time:.2f} seconds, Steps left: {steps_left}")
-        print(f"ETA: {eta:.2f} seconds")
         return eta
