@@ -2,6 +2,7 @@ import time
 from train_settings import TrainSettings
 from evaluator import Evaluator
 import torch
+import utility
 
 
 class TrainingLoop:
@@ -36,14 +37,23 @@ class TrainingLoop:
                     print(f"Memory usage: {torch.cuda.memory_allocated(self.settings.device) / 1024**2:.2f} MB")
                 loss = self.settings.loss_fn(outputs, labels)
                 epoch_tr_loss += loss.item()
-                
+
                 self.settings.optimizer.zero_grad()
                 loss.backward()
                 self.settings.optimizer.step()
-                if(self.settings.print_steps):
+                time.sleep(5)  # Simulate training step
+                if (self.settings.print_steps):
                     eta = time.time() - start_time
-                    print(f"Step {step}, Ellapsed {eta:.2f} seconds, Train Loss: {loss.item():.4f}, ETA: {TrainingLoop.calculate_step_eta(epoch-start_epoch, epochs - start_epoch, step, len(self.settings.train_data), len(self.settings.val_data), eta):.2f} seconds")
-            step += 1
+                    trloss = loss.item()
+                    eta_time_string = utility.time_string(TrainingLoop.calculate_step_eta(
+                        epoch-start_epoch,
+                        epochs - start_epoch,
+                        step,
+                        len(self.settings.train_data),
+                        len(self.settings.val_data), eta))
+                    print(
+                        f"Step {step}, Ellapsed {eta:.2f} seconds, Train Loss: {trloss}, ETA: {eta_time_string}")
+                step += 1
 
             evaluations = []
             self.settings.model.eval()
@@ -68,7 +78,10 @@ class TrainingLoop:
             self.settings.save_if_needed(epoch)
 
             if (epoch + 1) % self.settings.eval_after_epoch == 0:
-                print(f"Epoch {epoch + 1}/{epochs}, Ellapsed {(time.time() - start_time):.2f} seconds, Train Loss: {epoch_tr_loss:.4f}, Validation Loss: {epoch_val_loss:.4f} Evaluations: {evaluations} ETA: {self.ellapsed_time / (epoch + 1) * (epochs - epoch - 1):.2f} seconds")
+                eta_time_string = utility.time_string(self.ellapsed_time / (epoch + 1) * (epochs - epoch - 1))
+                print(f"Epoch {epoch + 1}/{epochs}, Ellapsed {(time.time() - start_time):.2f} seconds, " + 
+                      f"Train Loss: {epoch_tr_loss:.4f}, Validation Loss: {epoch_val_loss:.4f} Evaluations: " +
+                      f"{evaluations} ETA: {eta_time_string}")
 
         self.settings.save_final()
         end_time = time.time() - start_time
@@ -82,4 +95,6 @@ class TrainingLoop:
         steps_already_taken = current_epoch * step_per_epoch + current_step + 1
         step_time = ellapsed_time / steps_already_taken
         eta = step_time * steps_left
+        print(f"Step time: {step_time:.2f} seconds, Steps left: {steps_left}")
+        print(f"ETA: {eta:.2f} seconds")
         return eta
