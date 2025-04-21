@@ -33,8 +33,6 @@ class TrainingLoop:
             for imgs, labels in self.settings.train_data:
                 imgs, labels = imgs.to(self.settings.device), labels.to(self.settings.device)
                 outputs = self.settings.model(imgs)
-                if self.settings.print_memory:
-                    print(f"Memory usage: {torch.cuda.memory_allocated(self.settings.device) / 1024**2:.2f} MB")
                 loss = self.settings.loss_fn(outputs, labels)
                 epoch_tr_loss += loss.item()
 
@@ -42,8 +40,10 @@ class TrainingLoop:
                 loss.backward()
                 self.settings.optimizer.step()
                 if self.settings.print_after_steps > 0 and (step + 1) % self.settings.print_after_steps == 0:
+                    if self.settings.print_memory:
+                        print(f"Memory usage: {torch.cuda.memory_allocated(self.settings.device) / 1024**2:.2f} MB")
                     eta = time.time() - start_time
-                    trloss = loss.item() / ((step+1)*len(imgs))
+                    trloss = loss.item() / (step+1)
                     ellapsed_time_string = utility.time_string(eta)
                     eta_time_string = utility.time_string(TrainingLoop.calculate_step_eta(
                         epoch-start_epoch,
