@@ -1,25 +1,32 @@
 import torch
 import os
-from torch.utils.data import random_split, DataLoader
+from torch.utils.data import DataLoader
+from torch.nn import Module
 
 
 class TrainSettings:
+    """
+    Class to hold the training settings for a model.
+    This class is used to configure the training process, including
+    the model, dataset, optimizer, and other parameters.
+    """
+
     def __init__(self,
-                 name,
-                 model,
-                 dataset_tr,
-                 dataset_val,
-                 epochs=100,
-                 eval_after_epoch=10,
-                 save_path=None,
-                 device='cpu',
-                 batch_size=64,
-                 optimizer_type='adam',
-                 lr=0e-3,
-                 momentum=0.9,
-                 save_after_epoch=None,
-                 print_after_steps = -1,
-                 print_memory = False,
+                 name: str,
+                 model: Module,
+                 dataset_tr: torch.utils.data.Dataset,
+                 dataset_val: torch.utils.data.Dataset,
+                 epochs: int = 100,
+                 eval_after_epoch: int = 10,
+                 save_path: str = None,
+                 device: str = 'cpu',
+                 batch_size: int = 64,
+                 optimizer_type: str = 'adam',
+                 lr: float = 0e-3,
+                 momentum: float = 0.9,
+                 save_after_epoch: int = None,
+                 print_after_steps: int = -1,
+                 print_memory: bool = False,
                  ):
 
         if save_after_epoch is None:
@@ -60,10 +67,13 @@ class TrainSettings:
                 model.parameters(), lr=lr, momentum=momentum)
         else:
             raise ValueError(f"Unknown optimizer type: {optimizer_type}")
-        
+
         self.print_after_steps = print_after_steps
 
-    def properties(self):
+    def properties(self) -> dict:
+        """
+        Returns a dictionary with the properties of the training settings.
+        """
         return {
             'model': self.model.name(),
             'optimizer': self.optimizer_type,
@@ -76,11 +86,42 @@ class TrainSettings:
             'name': self.name
         }
 
-    def save_if_needed(self, epoch):
+    def save_if_needed(self, epoch: int) -> None:
+        """
+        Save the model if the current epoch is a multiple of save_after_epoch.
+        Args:
+            epoch (int): The current epoch.
+        """
         if (epoch+1) % self.save_after_epoch == 0:
-            torch.save(self.model.state_dict(), os.path.join(
-                self.save_path, f'{self.name}_epoch_{epoch}.pth'))
+            path = TrainSettings._save_model(self.model, os.path.join(
+                self.save_path, f'{self.name}_epoch_{epoch}'))
+            print(f"Model saved at {path} after epoch {epoch+1}.")
 
-    def save_final(self):
-        torch.save(self.model.state_dict(), os.path.join(
-            self.save_path, f'{self.name}_final.pth'))
+    def save_final(self, epoch: int) -> None:
+        """
+        Save the final model after training.
+
+        Args:
+            epoch (int): The current epoch.
+        """
+        path = TrainSettings._save_model(self.model, os.path.join(
+            self.save_path, f'{self.name}_epoch_{epoch}_final'))
+        print(f"Final model saved at {path} after epoch {epoch+1}.")
+
+    @staticmethod
+    def _save_model(model: torch.nn.Module, path_prefix: str, path_suffix: str = ".pth") -> str:
+        """
+        Save the model state dict to a file. Returns the path to the saved file.
+        Args:
+            model (torch.nn.Module): The model to save.
+            path_prefix (str): The prefix for the file path.
+            path_suffix (str): The suffix for the file path. (e.g. ".pth")
+        """
+        path = f"{path_prefix}{path_suffix}"
+        i = 1
+        while os.path.exists(path):
+            path = f"{path_prefix}_{i}_{path_suffix}"
+            i += 1
+
+        torch.save(model.state_dict(), path)
+        return path
