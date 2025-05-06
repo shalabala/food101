@@ -92,10 +92,10 @@ class TrainSettings:
         Args:
             epoch (int): The current epoch.
         """
-        if (epoch+1) % self.save_after_epoch == 0:
+        if (epoch) % self.save_after_epoch == 0:
             path = TrainSettings._save_model(self.model, os.path.join(
                 self.save_path, f'{self.name}_epoch_{epoch}'))
-            print(f"Model saved at {path} after epoch {epoch+1}.")
+            print(f"Model saved at {path} after epoch {epoch}.")
 
     def save_final(self, epoch: int) -> None:
         """

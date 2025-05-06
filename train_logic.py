@@ -58,7 +58,7 @@ class MockTrainLogic(TrainLogic):
         self.epoch += 1/self.steps_per_epoch
         tr_loss = self.tr_speed / self.epoch
         time.sleep(self.delay)
-        return MockTrainLogic.randomize(tr_loss, self.tr_speed)
+        return MockTrainLogic.randomize(tr_loss)
 
     def validate(self, val_data: torch.utils.data.DataLoader, device: str, model: torch.nn.Module,
                  loss_fn: torch.nn.Module, evaluators: list[Evaluator]) -> tuple[float, list[tuple[str, float]]]:

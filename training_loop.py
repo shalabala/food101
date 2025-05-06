@@ -81,7 +81,7 @@ class TrainingLoop:
 
             # if this is final epoch it would be saved anyways by save_final
             if epoch + 1 != epochs:
-                self.settings.save_if_needed(epoch)
+                self.settings.save_if_needed(epoch+1)
 
             if (epoch + 1) % self.settings.eval_after_epoch == 0:
                 ellapsed_time = time.time() - start_time
