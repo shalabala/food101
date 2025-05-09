@@ -110,7 +110,7 @@ class FoodModel_3(nn.Module):
         # The input size is 256x256, so after 5 max pooling layers,
         # the output size will be 8x8
         self.fc1 = nn.Linear(8*8*512, 512)
-        self.dropout = nn.Dropout(0.5)
+        self.dropout1 = nn.Dropout(0.5)
         self.fc2 = nn.Linear(512, 256)
         self.dropout2 = nn.Dropout(0.5)
         self.fc3 = nn.Linear(256, num_classes)
