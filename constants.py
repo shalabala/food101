@@ -8,7 +8,7 @@ transform = transforms.Compose([
     transforms.Resize((260,260)),                # Resize to 256x256
     transforms.RandomCrop((256,256)),                # Resize to 256x256
     transforms.Resize((256,256)),                # Resize to 256x256
-    transforms.CenterCrop(224),           # Crop to 224x224
+   # transforms.CenterCrop(224),           # Crop to 224x224
     transforms.ToTensor(),                # Convert to tensor
     transforms.Normalize(                  # Normalize
         mean=[0.485, 0.456, 0.406],       # Standard ImageNet normalization
