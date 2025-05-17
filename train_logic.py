@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import random
 import time
-
+import math
 import torch
 import torch.utils
 import torch.utils.data
@@ -71,7 +71,7 @@ class MockTrainLogic(TrainLogic):
             (self.tr_speed * self.val_rate) / self.epoch
             
         val_loss = MockTrainLogic.randomize(val_loss_raw) * len(val_data)
-        return (val_loss, [(evaluator.__str__(), evaluator.get_value()) for evaluator in evaluators])
+        return (val_loss, [(str(evaluator), math.tanh(1/val_loss)) for evaluator in evaluators])
 
     @staticmethod
     def randomize(value, std=.1):

@@ -4,10 +4,13 @@ from train_settings import TrainSettings
 from evaluator import Evaluator
 import torch
 import utility
+from matplotlib import pyplot as plt
+import json
 
 
 class TrainingLoop:
-    def __init__(self, settings: TrainSettings, train_logic: TrainLogic, evals: list[Evaluator] = []):
+    def __init__(self, settings: TrainSettings, train_logic: TrainLogic, fname:str, evals: list[Evaluator] = []):
+        self.fname = fname
         self.current_epoch = -1
         self.ellapsed_time = 0
         self.tr_losses = []
@@ -16,6 +19,39 @@ class TrainingLoop:
         self.evaluators = evals
         self.settings = settings
         self.train_logic = train_logic
+    
+    def save_infos(self):
+        """
+        Saves the training statistics to a file.
+        """
+        dict = {
+            "epoch": self.current_epoch,
+            "ellapsed_time": self.ellapsed_time,
+            "tr_losses": self.tr_losses,
+            "val_losses": self.val_losses,
+            "evaluations": self.evaluations
+        }
+        
+        with open(self.fname, "w") as f:
+            json.dump(dict, f, indent=4)
+        print(f"Saved training state to {self.fname}")
+        
+    def load_infos(self):
+        """
+        Loads the training statistics from the file.
+        """
+        try:
+            with open(self.fname, "r") as f:
+                dict = json.load(f)
+                self.current_epoch = dict["epoch"]
+                self.ellapsed_time = dict["ellapsed_time"]
+                self.tr_losses = dict["tr_losses"]
+                self.val_losses = dict["val_losses"]
+                self.evaluations = dict["evaluations"]
+                print(f"Loaded training state from {self.fname}")
+        except FileNotFoundError:
+            print(f"Training state file {self.fname} not found. Starting from scratch.")
+        
 
     def train(self,  epochs=None):
         if epochs is None:
@@ -25,7 +61,7 @@ class TrainingLoop:
         start_time = time.time()
         print(f"Training {self.settings.name} for {epochs} epochs")
         print(f"Training on {self.settings.device}")
-        start_epoch = self.current_epoch
+        start_epoch = self.current_epoch + 1
         for epoch in range(self.current_epoch + 1, epochs):
             self.settings.model.train()
             epoch_tr_loss = 0.0
@@ -86,7 +122,7 @@ class TrainingLoop:
             if (epoch + 1) % self.settings.eval_after_epoch == 0:
                 ellapsed_time = time.time() - start_time
                 eta_time_string = utility.time_string(
-                    ellapsed_time / (epoch + 1) * (epochs - epoch - 1))
+                    ellapsed_time / (epoch - start_epoch + 1) * (epochs -epoch - 1))
                 ellapsed_time_string = utility.time_string(ellapsed_time)
                 print(f"[{utility.current_time_for_log()}] Epoch {epoch + 1}/{epochs}, Ellapsed {ellapsed_time_string} seconds, " +
                       f"Train Loss: {normalized_tr_loss:.4f}, Validation Loss: {normalized_val_loss:.4f} Evaluations: " +
@@ -95,6 +131,29 @@ class TrainingLoop:
         self.settings.save_final(epoch)
         end_time = time.time() - start_time
         self.ellapsed_time += end_time
+
+    def plot_losses(self):
+        epochs = len(self.tr_losses)+1
+        fig = plt.figure()
+        plt.legend("training and validation error")
+        plt.xlabel("epoch")
+        plt.ylabel("training error")
+        plt.plot(range(1, epochs), self.tr_losses, label="training error")
+        plt.plot(range(1, epochs), self.val_losses, label="validation error")
+        plt.legend()
+        plt.show()
+    
+    def plot_evaluations(self):
+        fig = plt.figure()
+        plt.legend("evaluations")
+        plt.xlabel("epoch")
+        plt.ylabel("evaluations")
+        for i in range(len(self.evaluators)):
+            name = str(self.evaluators[i])
+            values =[tuple[1] for list in self.evaluations for tuple in list if tuple[0]==name]
+            plt.plot(range(1, len(self.evaluations)+1), values, label=name)
+        plt.legend()
+        plt.show()
 
     @staticmethod
     def calculate_step_eta(current_epoch, epochs, current_step, tr_len,  val_len,  ellapsed_time):
