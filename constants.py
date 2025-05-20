@@ -5,7 +5,7 @@ transforms_tr = transforms.Compose([
         transforms.RandomAffine(degrees=15, translate=(0.1, 0.1), scale=(0.9, 1.1), shear=10),
         transforms.RandomHorizontalFlip(),
         transforms.RandomRotation(30),
-    ], p=0.5),
+    ], p=0.9),
      
     transforms.Resize((260,260)),
     transforms.RandomCrop((256,256)),
