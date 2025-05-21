@@ -107,6 +107,15 @@ class TrainSettings:
         path = TrainSettings._save_model(self.model, os.path.join(
             self.save_path, f'{self.name}_epoch_{epoch}_final'))
         print(f"Final model saved at {path} after epoch {epoch+1}.")
+        
+    def save_snapshot(self):
+        """
+        Save a snapshot of the model.
+        """
+        path = os.path.join(
+            self.save_path, f'{self.name}_snapshot.pth')
+        torch.save(self.model.state_dict(), path)
+        print(f"Model snapshot saved at {path}.")
 
     @staticmethod
     def _save_model(model: torch.nn.Module, path_prefix: str, path_suffix: str = ".pth") -> str:

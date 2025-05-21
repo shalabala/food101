@@ -128,9 +128,32 @@ class TrainingLoop:
                       f"Train Loss: {normalized_tr_loss:.4f}, Validation Loss: {normalized_val_loss:.4f} Evaluations: " +
                       f"{evaluations} ETA: {eta_time_string}")
 
-        self.settings.save_final(epoch)
+        self.settings.save_final(epoch+1)
         end_time = time.time() - start_time
         self.ellapsed_time += end_time
+
+    def print_infos(self, epochs:bool = False):
+        """
+        Prints the training statistics.
+        """
+        print(f"Training '{self.settings.name}'")
+        print(f"Ellapsed time: {utility.time_string(self.ellapsed_time)}")
+        print(f"Training loss: {self.tr_losses[-1]:.4f}")
+        print(f"Validation loss: {self.val_losses[-1]:.4f}")
+        for i in range(len(self.evaluators)):
+            name = str(self.evaluators[i])
+            values = [tuple[1] for list in self.evaluations for tuple in list if tuple[0] == name]
+            print(f"{name}: {values[-1]:.2f}")
+        if not epochs:
+            return
+        
+        print("EPOCHS")
+        for i in range(len(self.tr_losses)):
+            print(f"Epoch {i+1}: training loss: {self.tr_losses[i]:.4f}, validation loss: {self.val_losses[i]:.4f}"+
+                  f" evaluations: [{self.get_eval_string(i)}]")
+        
+    def get_eval_string(self, epoch: int):
+        return " ".join([f'{e[0]} {e[1]:.02f}' for e in self.evaluations[epoch]])
 
     def plot_losses(self):
         epochs = len(self.tr_losses)+1
