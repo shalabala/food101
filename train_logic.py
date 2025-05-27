@@ -113,7 +113,7 @@ class TrainLogicImplementation(TrainLogic):
             imgs, labels = imgs.to(device), labels.to(
                 device)
             outputs = model(imgs)
-            loss = loss_fn(outputs, labels)
+            loss = loss_fn(outputs, labels) if loss_fn is not None else torch.tensor(0.0)
             epoch_val_loss += loss.item()
             for evaluator in evaluators:
                 evaluator.pass_predictions(outputs, labels)

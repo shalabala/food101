@@ -1,5 +1,5 @@
 *.pth
-training.json
+training*.json
 #models
 *_saves/
 # Byte-compiled / optimized / DLL files
